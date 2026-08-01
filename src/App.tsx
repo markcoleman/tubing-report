@@ -585,6 +585,73 @@ export function App() {
           </aside>
         </section>
 
+        <section className="route-section" aria-labelledby="route-title">
+          <div className="route-intro">
+            <span className="section-kicker dark">The Yellow Breeches float plan</span>
+            <h2 id="route-title">Messiah to McCormick.<br /><em>Let’s get weirdly scenic.</em></h2>
+            <p>
+              A laid-back downstream adventure from the Messiah College access to
+              McCormick Park take-out. Pack water, secure your snacks, and leave
+              the glass at home.
+            </p>
+            <div className="route-stats" aria-label="Route quick facts">
+              <div><strong>~6.5</strong><span>river miles</span></div>
+              <div><strong>3–4</strong><span>hours-ish</span></div>
+              <div><strong>100%</strong><span>better afloat</span></div>
+            </div>
+            <p className="route-disclaimer">* Time and distance are playful planning estimates. Flow, stops, and snack negotiations change everything.</p>
+          </div>
+
+          <div className="route-map" aria-label="Illustrated route map from Messiah College to McCormick Park">
+            <div className="map-label">Not to scale. Very much to vibe.</div>
+            <svg viewBox="0 0 760 540" role="img" aria-labelledby="map-title map-desc">
+              <title id="map-title">Yellow Breeches tubing route</title>
+              <desc id="map-desc">An illustrated creek route running from the Messiah College put-in to McCormick Park take-out with three landmarks.</desc>
+              <path className="map-road" d="M-30 130 C130 180 165 65 330 105 S570 170 790 88" />
+              <path className="map-road thin" d="M92 -20 C140 130 68 260 130 580" />
+              <path className="creek-shadow" d="M54 72 C165 45 180 163 282 159 C397 155 333 279 458 280 C576 281 508 406 701 459" />
+              <path className="creek" d="M54 72 C165 45 180 163 282 159 C397 155 333 279 458 280 C576 281 508 406 701 459" />
+              <path className="route-dashes" d="M54 72 C165 45 180 163 282 159 C397 155 333 279 458 280 C576 281 508 406 701 459" />
+              <g className="map-trees" aria-hidden="true">
+                <text x="320" y="70">♠</text><text x="360" y="90">♠</text><text x="615" y="245">♠</text><text x="650" y="225">♠</text><text x="226" y="400">♠</text><text x="275" y="425">♠</text>
+              </g>
+              <g className="map-stop start">
+                <circle cx="54" cy="72" r="18" /><text x="54" y="79">1</text>
+                <rect x="72" y="25" width="185" height="66" rx="15" />
+                <text className="stop-title" x="90" y="52">PUT IN</text><text className="stop-name" x="90" y="75">Messiah College</text>
+              </g>
+              <g className="map-stop finish">
+                <circle cx="701" cy="459" r="18" /><text x="701" y="466">2</text>
+                <rect x="465" y="438" width="208" height="68" rx="15" />
+                <text className="stop-title" x="485" y="465">HOP OUT</text><text className="stop-name" x="485" y="490">McCormick Park</text>
+              </g>
+              <g className="fun-pin"><circle cx="282" cy="159" r="7"/><text x="300" y="145">Wave at the herons</text></g>
+              <g className="fun-pin"><circle cx="458" cy="280" r="7"/><text x="477" y="266">Prime snack zone</text></g>
+              <g className="fun-pin"><circle cx="568" cy="377" r="7"/><text x="590" y="363">Final wiggle</text></g>
+            </svg>
+            <div className="map-compass" aria-hidden="true"><span>N</span>↑</div>
+          </div>
+        </section>
+
+        <section className="review-section" aria-labelledby="review-title">
+          <div className="review-heading">
+            <span className="section-kicker">Unfiltered river wisdom</span>
+            <h2 id="review-title">The people have floated.</h2>
+          </div>
+          <article className="review-card">
+            <div className="review-avatar" aria-hidden="true">?</div>
+            <div className="review-body">
+              <div className="review-meta">
+                <div><strong>Anonymous River Rat</strong><span>Verified floater-ish</span></div>
+                <div className="stars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <blockquote>“Butts up, nuts up. Rocks up, box up”</blockquote>
+              <div className="review-footer"><span>Hudak Outfitters</span><span>Helpful? <button type="button">You betcha</button></span></div>
+            </div>
+          </article>
+          <p className="review-fineprint">A totally real-looking fake review for demonstration purposes. The creek, however, is extremely real.</p>
+        </section>
+
         {report && (
           <>
             <section className="forecast-section" aria-labelledby="forecast-title">
