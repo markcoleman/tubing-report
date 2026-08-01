@@ -94,6 +94,27 @@ const DEFAULT_LOCATION: Location = {
   timezone: "America/New_York",
 };
 
+const yellowBreechesRoute =
+  "M 65 350.9 C 74.1 351.5, 107.2 350.9, 119.9 354.7 C 132.6 358.5, 124.8 367.8, 141.4 373.5 C 157.9 379.2, 201 383.6, 219.2 389 C 237.5 394.4, 244.5 399.9, 250.8 406 C 257 412.1, 250.6 420.6, 256.7 425.5 C 262.8 430.3, 271.4 438.4, 287.5 435 C 303.6 431.6, 340.7 411.7, 353.1 405.2 C 365.5 398.7, 358.7 403, 361.7 396 C 364.8 389, 364 375.2, 371.3 363.1 C 378.6 351.1, 397.1 331.9, 405.6 323.7 C 414.2 315.6, 418.8 318, 422.7 314.2 C 426.6 310.5, 430.3 307.7, 429.1 301.1 C 428 294.4, 421.5 282.5, 415.6 274.3 C 409.8 266.1, 407.5 256.1, 393.9 252.1 C 380.3 248.1, 347.7 248.9, 334.3 250.4 C 320.9 251.8, 323.8 261.1, 313.4 260.8 C 303.1 260.6, 283.4 255.4, 272.2 248.9 C 260.9 242.3, 255 235.2, 245.9 221.6 C 236.7 208, 222.5 177.3, 217.4 167.2 C 212.3 157.1, 214.3 164, 215.4 160.8 C 216.5 157.6, 210.6 157.2, 223.9 148.2 C 237.2 139.2, 276.2 109.2, 294.9 106.9 C 313.7 104.6, 323.1 127.4, 336.2 134.5 C 349.3 141.6, 347.6 144.5, 373.5 149.3 C 399.3 154.1, 469.1 161, 491.3 163.3 C 513.6 165.6, 502.2 164.6, 507.2 163.3 C 512.1 162, 514.2 163.8, 521 155.4 C 527.8 147, 540.9 121.5, 547.8 113.1 C 554.8 104.8, 547.9 101.7, 562.8 105.2 C 577.7 108.7, 620.5 129.7, 637.3 133.9 C 654 138.2, 653.7 133.5, 663.3 130.6 C 672.9 127.7, 689.7 118.8, 695 116.5";
+
+const floatPlaylist = [
+  { title: "Float On", artist: "Modest Mouse", note: "For when the creek handles navigation." },
+  { title: "Send Me on My Way", artist: "Rusted Root", note: "Pennsylvania-grown launch energy." },
+  { title: "Take Me to the River", artist: "Talking Heads", note: "The title understood the assignment." },
+  { title: "Here Comes the Sun", artist: "The Beatles", note: "Deploy only when the forecast agrees." },
+  { title: "The Swimming Song", artist: "Loudon Wainwright III", note: "Jaunty, aquatic, suspiciously specific." },
+  { title: "Island in the Sun", artist: "Weezer", note: "Your tube is the island. Science." },
+];
+
+const floatKit = [
+  { glyph: "◎", title: "A properly fitted PFD", note: "Wear it. Looking cool is easier while breathing." },
+  { glyph: "◒", title: "Water + sturdy snacks", note: "Hydration for you; sandwiches that can take a jostle." },
+  { glyph: "✦", title: "Sunscreen + a hat", note: "The sun is delightful and also a giant laser." },
+  { glyph: "▣", title: "A truly dry bag", note: "Phone, keys, meds, and one emergency dry sock." },
+  { glyph: "↔", title: "Water shoes + towel", note: "Creek rocks are pointy little overachievers." },
+  { glyph: "⌁", title: "A take-out shuttle plan", note: "Leave a car at McCormick before the grand plop-in." },
+];
+
 const weatherDescriptions: Record<number, { label: string; glyph: string }> = {
   0: { label: "Clear sky", glyph: "☀" },
   1: { label: "Mostly clear", glyph: "◑" },
@@ -590,46 +611,131 @@ export function App() {
             <span className="section-kicker dark">The Yellow Breeches float plan</span>
             <h2 id="route-title">Messiah to McCormick.<br /><em>Let’s get weirdly scenic.</em></h2>
             <p>
-              A laid-back downstream adventure from the Messiah College access to
-              McCormick Park take-out. Pack water, secure your snacks, and leave
-              the glass at home.
+              A laid-back downstream adventure from the Messiah University access to
+              McCormick Park, with a picnic-worthy checkpoint at Simpson Park.
+              Pack water, secure your snacks, and leave the glass at home.
             </p>
             <div className="route-stats" aria-label="Route quick facts">
-              <div><strong>~6.5</strong><span>river miles</span></div>
+              <div><strong>~3.6</strong><span>river miles</span></div>
               <div><strong>3–4</strong><span>hours-ish</span></div>
-              <div><strong>100%</strong><span>better afloat</span></div>
+              <div><strong>2.5</strong><span>miles to Simpson</span></div>
             </div>
             <p className="route-disclaimer">* Time and distance are playful planning estimates. Flow, stops, and snack negotiations change everything.</p>
           </div>
 
           <div className="route-map" aria-label="Illustrated route map from Messiah College to McCormick Park">
-            <div className="map-label">Not to scale. Very much to vibe.</div>
-            <svg viewBox="0 0 760 540" role="img" aria-labelledby="map-title map-desc">
+            <div className="map-label">Real bends. Silly labels.</div>
+            <svg viewBox="0 0 760 500" role="img" aria-labelledby="map-title map-desc">
               <title id="map-title">Yellow Breeches tubing route</title>
-              <desc id="map-desc">An illustrated creek route running from the Messiah College put-in to McCormick Park take-out with three landmarks.</desc>
-              <path className="map-road" d="M-30 130 C130 180 165 65 330 105 S570 170 790 88" />
-              <path className="map-road thin" d="M92 -20 C140 130 68 260 130 580" />
-              <path className="creek-shadow" d="M54 72 C165 45 180 163 282 159 C397 155 333 279 458 280 C576 281 508 406 701 459" />
-              <path className="creek" d="M54 72 C165 45 180 163 282 159 C397 155 333 279 458 280 C576 281 508 406 701 459" />
-              <path className="route-dashes" d="M54 72 C165 45 180 163 282 159 C397 155 333 279 458 280 C576 281 508 406 701 459" />
+              <desc id="map-desc">A north-up illustrated map following the actual bends of Yellow Breeches Creek from the Messiah University put-in, past Simpson Park at mile 2.5, to the McCormick Park take-out at mile 3.6.</desc>
+
+              <text className="map-county-label" x="92" y="64">CUMBERLAND COUNTY</text>
+              <text className="map-county-label south" x="476" y="454">YORK COUNTY</text>
+
+              <path className="map-road-outline" d="M112 520 C96 430 102 342 149 252" />
+              <path className="map-road" d="M112 520 C96 430 102 342 149 252" />
+              <text className="road-label" x="71" y="286" transform="rotate(-70 71 286)">Grantham Rd</text>
+              <path className="map-road-outline" d="M374 -25 C365 55 352 135 347 226" />
+              <path className="map-road" d="M374 -25 C365 55 352 135 347 226" />
+              <text className="road-label" x="366" y="79" transform="rotate(-83 366 79)">PA 114</text>
+              <path className="map-road-outline" d="M646 -20 C657 61 691 150 739 227" />
+              <path className="map-road" d="M646 -20 C657 61 691 150 739 227" />
+              <text className="road-label" x="696" y="67" transform="rotate(70 696 67)">McCormick Rd</text>
+
+              <path className="creek-shadow" d={yellowBreechesRoute} />
+              <path className="creek" d={yellowBreechesRoute} />
+              <path className="route-dashes" d={yellowBreechesRoute} />
               <g className="map-trees" aria-hidden="true">
-                <text x="320" y="70">♠</text><text x="360" y="90">♠</text><text x="615" y="245">♠</text><text x="650" y="225">♠</text><text x="226" y="400">♠</text><text x="275" y="425">♠</text>
+                <text x="28" y="195">♠</text><text x="66" y="224">♠</text><text x="184" y="323">♠</text><text x="455" y="229">♠</text><text x="495" y="245">♠</text><text x="590" y="199">♠</text><text x="625" y="226">♠</text>
               </g>
               <g className="map-stop start">
-                <circle cx="54" cy="72" r="18" /><text x="54" y="79">1</text>
-                <rect x="72" y="25" width="185" height="66" rx="15" />
-                <text className="stop-title" x="90" y="52">PUT IN</text><text className="stop-name" x="90" y="75">Messiah College</text>
+                <circle cx="65" cy="351" r="18" /><text x="65" y="358">1</text>
+                <rect x="85" y="316" width="198" height="69" rx="15" />
+                <text className="stop-title" x="103" y="340">PUT IN · MILE 0</text>
+                <text className="stop-name" x="103" y="366">Messiah University</text>
+              </g>
+              <g className="map-stop middle">
+                <circle cx="336" cy="135" r="18" /><text x="336" y="142">2</text>
+                <rect x="226" y="159" width="222" height="69" rx="15" />
+                <text className="stop-title" x="245" y="183">PICNIC STOP · MILE 2.5</text>
+                <text className="stop-name" x="245" y="209">Simpson Park</text>
               </g>
               <g className="map-stop finish">
-                <circle cx="701" cy="459" r="18" /><text x="701" y="466">2</text>
-                <rect x="465" y="438" width="208" height="68" rx="15" />
-                <text className="stop-title" x="485" y="465">HOP OUT</text><text className="stop-name" x="485" y="490">McCormick Park</text>
+                <circle cx="695" cy="117" r="18" /><text x="695" y="124">3</text>
+                <rect x="465" y="24" width="219" height="69" rx="15" />
+                <text className="stop-title" x="484" y="48">HOP OUT · MILE 3.6</text>
+                <text className="stop-name" x="484" y="74">McCormick Park</text>
               </g>
-              <g className="fun-pin"><circle cx="282" cy="159" r="7"/><text x="300" y="145">Wave at the herons</text></g>
-              <g className="fun-pin"><circle cx="458" cy="280" r="7"/><text x="477" y="266">Prime snack zone</text></g>
-              <g className="fun-pin"><circle cx="568" cy="377" r="7"/><text x="590" y="363">Final wiggle</text></g>
+              <g className="fun-pin"><circle cx="288" cy="435" r="7"/><text x="308" y="464">The big southern squiggle</text></g>
+              <g className="fun-pin"><circle cx="416" cy="274" r="7"/><text x="439" y="293">Tree-tunnel energy</text></g>
+              <text className="flow-label" x="515" y="144">FLOW THIS WAY →</text>
             </svg>
             <div className="map-compass" aria-hidden="true"><span>N</span>↑</div>
+            <p className="map-attribution">
+              Access points and mileage: <a href="https://www.cumberlandcountypa.gov/DocumentCenter/View/23587/YellowBreechesGuide_2015Version" target="_blank" rel="noreferrer">Cumberland County Water Trail Guide</a>
+              <span> · </span>
+              Creek geometry © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
+            </p>
+          </div>
+        </section>
+
+        <section className="float-kit-section" aria-labelledby="float-kit-title">
+          <div className="float-kit-heading">
+            <div>
+              <span className="section-kicker light">Highly scientific fun supplies</span>
+              <h2 id="float-kit-title">Pack it. Play it.<br /><em>Plop in.</em></h2>
+            </div>
+            <p>
+              A tiny soundtrack and a mighty checklist for maximum creek joy with
+              minimum “oh beans, I forgot the keys.”
+            </p>
+          </div>
+
+          <div className="float-kit-grid">
+            <article className="kit-panel playlist-panel">
+              <div className="kit-panel-heading">
+                <div>
+                  <span className="kit-label">River radio</span>
+                  <h3>Songs that know how to float</h3>
+                </div>
+                <span className="record-badge" aria-hidden="true"><i>♪</i></span>
+              </div>
+              <ol className="song-list">
+                {floatPlaylist.map((song, index) => (
+                  <li key={song.title}>
+                    <span className="song-number">{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <strong>{song.title}</strong>
+                      <span>{song.artist}</span>
+                    </div>
+                    <small>{song.note}</small>
+                  </li>
+                ))}
+              </ol>
+              <p className="kit-footnote">Speaker etiquette: keep it tiny, friendly, and quieter than the actual birds.</p>
+            </article>
+
+            <article className="kit-panel packing-panel">
+              <div className="kit-panel-heading">
+                <div>
+                  <span className="kit-label">The no-regrets bag</span>
+                  <h3>Things future-you will thank you for</h3>
+                </div>
+                <span className="bag-badge" aria-hidden="true">✓</span>
+              </div>
+              <ul className="packing-list">
+                {floatKit.map((item) => (
+                  <li key={item.title}>
+                    <span className="packing-icon" aria-hidden="true">{item.glyph}</span>
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.note}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <p className="kit-footnote"><strong>Bonus points:</strong> a small trash bag, basic first aid, dry clothes, and absolutely no glass.</p>
+            </article>
           </div>
         </section>
 
