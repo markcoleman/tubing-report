@@ -2,6 +2,8 @@
 
 Riverwise is a static location-based weather and water report designed for GitHub Pages. It combines a worldwide seven-day forecast from Open-Meteo with recent observations from nearby active USGS stream gauges.
 
+The app opens on Lewisberry, Pennsylvania, and can be moved anywhere using search or browser location.
+
 ## What it does
 
 - Searches by city, state, or ZIP code

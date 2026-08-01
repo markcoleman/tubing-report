@@ -85,12 +85,12 @@ type Report = {
 };
 
 const DEFAULT_LOCATION: Location = {
-  name: "Maple Shade",
-  admin1: "New Jersey",
+  name: "Lewisberry",
+  admin1: "Pennsylvania",
   country: "United States",
   country_code: "US",
-  latitude: 39.9526,
-  longitude: -74.9924,
+  latitude: 40.13509,
+  longitude: -76.85969,
   timezone: "America/New_York",
 };
 
@@ -128,10 +128,34 @@ const weatherDescriptions: Record<number, { label: string; glyph: string }> = {
 const getWeatherDescription = (code: number) =>
   weatherDescriptions[code] ?? { label: "Changing conditions", glyph: "◌" };
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Data source returned ${response.status}`);
-  return response.json() as Promise<T>;
+async function fetchJson<T>(
+  url: string,
+  options: { retries?: number; timeoutMs?: number } = {},
+): Promise<T> {
+  const { retries = 0, timeoutMs = 0 } = options;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = timeoutMs ? new AbortController() : undefined;
+    const timeout = controller
+      ? window.setTimeout(() => controller.abort(), timeoutMs)
+      : undefined;
+
+    try {
+      const response = await fetch(url, { signal: controller?.signal });
+      if (!response.ok) throw new Error(`Data source returned ${response.status}`);
+      return response.json() as Promise<T>;
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await new Promise((resolve) => window.setTimeout(resolve, 350 * (attempt + 1)));
+      }
+    } finally {
+      if (timeout !== undefined) window.clearTimeout(timeout);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Data source request failed");
 }
 
 async function geocode(query: string): Promise<Location> {
@@ -237,30 +261,40 @@ function groupGauges(
 }
 
 async function fetchWater(location: Location): Promise<Gauge[]> {
-  const latitudeDelta = 0.7;
-  const longitudeDelta = Math.min(
-    1.4,
-    latitudeDelta / Math.max(0.5, Math.cos((location.latitude * Math.PI) / 180)),
-  );
-  const west = Math.max(-179.999, location.longitude - longitudeDelta);
-  const east = Math.min(179.999, location.longitude + longitudeDelta);
-  const south = Math.max(-89.999, location.latitude - latitudeDelta);
-  const north = Math.min(89.999, location.latitude + latitudeDelta);
+  let nearest: Gauge[] = [];
 
-  const nearbyUrl = new URL("https://waterservices.usgs.gov/nwis/iv/");
-  nearbyUrl.searchParams.set("format", "json");
-  nearbyUrl.searchParams.set("bBox", `${west},${south},${east},${north}`);
-  nearbyUrl.searchParams.set("parameterCd", "00060,00065,00010");
-  nearbyUrl.searchParams.set("siteStatus", "active");
-  nearbyUrl.searchParams.set("siteType", "ST");
+  // Start close to the selected place. Large USGS bounding-box queries can be
+  // surprisingly slow, so widen only when a sparse area needs it.
+  for (const latitudeDelta of [0.2, 0.4, 0.7]) {
+    const longitudeDelta = Math.min(
+      1.4,
+      latitudeDelta / Math.max(0.5, Math.cos((location.latitude * Math.PI) / 180)),
+    );
+    const west = Math.max(-179.999, location.longitude - longitudeDelta);
+    const east = Math.min(179.999, location.longitude + longitudeDelta);
+    const south = Math.max(-89.999, location.latitude - latitudeDelta);
+    const north = Math.min(89.999, location.latitude + latitudeDelta);
+    const boundingBox = [west, south, east, north]
+      .map((coordinate) => coordinate.toFixed(6))
+      .join(",");
 
-  const nearbyData = await fetchJson<{
-    value?: { timeSeries?: UsgsSeries[] };
-  }>(nearbyUrl.toString());
-  const nearest = groupGauges(
-    nearbyData.value?.timeSeries ?? [],
-    location,
-  ).slice(0, 4);
+    const nearbyUrl = new URL("https://waterservices.usgs.gov/nwis/iv/");
+    nearbyUrl.searchParams.set("format", "json");
+    nearbyUrl.searchParams.set("bBox", boundingBox);
+    nearbyUrl.searchParams.set("parameterCd", "00060,00065,00010");
+    nearbyUrl.searchParams.set("siteStatus", "active");
+    nearbyUrl.searchParams.set("siteType", "ST");
+
+    const nearbyData = await fetchJson<{
+      value?: { timeSeries?: UsgsSeries[] };
+    }>(nearbyUrl.toString(), { retries: 1, timeoutMs: 12000 });
+    nearest = groupGauges(
+      nearbyData.value?.timeSeries ?? [],
+      location,
+    ).slice(0, 4);
+    if (nearest.length >= 4) break;
+  }
+
   if (!nearest.length) return [];
 
   const ids = new Set(nearest.map((gauge) => gauge.id));
@@ -273,7 +307,7 @@ async function fetchWater(location: Location): Promise<Gauge[]> {
 
   const detailData = await fetchJson<{
     value?: { timeSeries?: UsgsSeries[] };
-  }>(detailUrl.toString());
+  }>(detailUrl.toString(), { retries: 1, timeoutMs: 12000 });
   return groupGauges(detailData.value?.timeSeries ?? [], location, ids);
 }
 
@@ -346,12 +380,13 @@ function LoadingCard() {
 }
 
 export function App() {
-  const [query, setQuery] = useState("Maple Shade, NJ");
+  const [query, setQuery] = useState("Lewisberry, PA");
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
   const requestId = useRef(0);
+  const initialLoadStarted = useRef(false);
 
   const loadReport = async (location: Location) => {
     const thisRequest = ++requestId.current;
@@ -362,7 +397,13 @@ export function App() {
       const weatherPromise = fetchWeather(location);
       const waterPromise = fetchWater(location).then(
         (gauges) => ({ gauges }),
-        () => ({ gauges: [] as Gauge[], waterError: "Gauge data is temporarily unavailable." }),
+        (waterFailure) => {
+          console.warn("USGS gauge request failed", waterFailure);
+          return {
+            gauges: [] as Gauge[],
+            waterError: "The USGS gauge service took a snack break. Give it another splash.",
+          };
+        },
       );
       const [weather, water] = await Promise.all([weatherPromise, waterPromise]);
       if (thisRequest !== requestId.current) return;
@@ -377,6 +418,8 @@ export function App() {
   };
 
   useEffect(() => {
+    if (initialLoadStarted.current) return;
+    initialLoadStarted.current = true;
     void loadReport(DEFAULT_LOCATION);
   }, []);
 
@@ -637,6 +680,16 @@ export function App() {
                     <p>
                       {report.waterError ?? "Weather is available worldwide, but this water report uses U.S. Geological Survey gauges within roughly 50 miles."}
                     </p>
+                    {report.waterError && (
+                      <button
+                        className="retry-gauge-button"
+                        type="button"
+                        onClick={() => void loadReport(report.location)}
+                        disabled={loading}
+                      >
+                        Try the gauge gossip again
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
