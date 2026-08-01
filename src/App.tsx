@@ -400,6 +400,146 @@ function LoadingCard() {
   );
 }
 
+function WaterSection({
+  report,
+  loading,
+  onRetry,
+}: {
+  report: Report;
+  loading: boolean;
+  onRetry: () => void;
+}) {
+  return (
+    <section id="water-conditions" className="water-section" aria-labelledby="water-title">
+      <div className="water-heading">
+        <div>
+          <span className="section-kicker light">01B · Conditions on the water</span>
+          <h2 id="water-title">The river has receipts</h2>
+        </div>
+        <p>
+          Real observations from active stream gauges, ranked from “right over there” to “still pretty close.”
+        </p>
+      </div>
+
+      {loading ? (
+        <LoadingCard />
+      ) : report.gauges.length ? (
+        <div className="gauge-grid">
+          {report.gauges.map((gauge, index) => {
+            const trend = trendFor(gauge.discharge);
+            return (
+              <article className="gauge-card" key={gauge.id}>
+                <div className="gauge-topline">
+                  <span>Nosy gauge {String(index + 1).padStart(2, "0")}</span>
+                  <span>{gauge.distance.toFixed(1)} mi away-ish</span>
+                </div>
+                <h3>{gauge.name.replace(/^USGS\s+/i, "")}</h3>
+                <div className="flow-reading">
+                  <div>
+                    <span>Discharge</span>
+                    <strong>{gauge.discharge ? Math.round(gauge.discharge.value).toLocaleString() : "—"}</strong>
+                    <small>{gauge.discharge?.unit ?? "cfs"}</small>
+                  </div>
+                  <SparkBars values={gauge.discharge?.series ?? []} />
+                </div>
+                <div className="gauge-metrics">
+                  <div>
+                    <span>Gauge height</span>
+                    <strong>{gauge.height ? `${gauge.height.value.toFixed(2)} ${gauge.height.unit}` : "Not reported"}</strong>
+                  </div>
+                  <div>
+                    <span>Water temp</span>
+                    <strong>{gauge.waterTemperature ? `${gauge.waterTemperature.value.toFixed(1)} ${gauge.waterTemperature.unit}` : "Not reported"}</strong>
+                  </div>
+                </div>
+                <div className="gauge-footer">
+                  <span className={`trend ${trend.tone}`}>{trend.label}</span>
+                  <span>{formatObservedAt(gauge.discharge?.time ?? gauge.height?.time)}</span>
+                </div>
+                <a
+                  href={`https://waterdata.usgs.gov/monitoring-location/${gauge.id}/`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  See the official nerdy details <span aria-hidden="true">↗</span>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="empty-water">
+          <span aria-hidden="true">≈</span>
+          <div>
+            <h3>No nearby USGS stream gauges found</h3>
+            <p>
+              {report.waterError ?? "Weather is available worldwide, but this water report uses U.S. Geological Survey gauges within roughly 50 miles."}
+            </p>
+            {report.waterError && (
+              <button
+                className="retry-gauge-button"
+                type="button"
+                onClick={onRetry}
+                disabled={loading}
+              >
+                Try the gauge gossip again
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ForecastSection({ report }: { report: Report }) {
+  return (
+    <section id="forecast" className="forecast-section" aria-labelledby="forecast-title">
+      <div className="section-heading">
+        <div>
+          <span className="section-kicker dark">01C · Conditions ahead</span>
+          <h2 id="forecast-title">What the clouds are cooking</h2>
+        </div>
+        <p>The farther out we look, the more the clouds may be making things up. Check again before launch.</p>
+      </div>
+
+      <div className="forecast-grid">
+        {report.weather.daily.time.map((date, index) => {
+          const description = getWeatherDescription(report.weather.daily.weather_code[index]);
+          return (
+            <article className="forecast-day" key={date}>
+              <span className="day-name">{formatDay(date, index)}</span>
+              <span className="forecast-glyph" aria-hidden="true">{description.glyph}</span>
+              <span className="forecast-label">{description.label}</span>
+              <div className="temperatures">
+                <strong>{Math.round(report.weather.daily.temperature_2m_max[index])}°</strong>
+                <span>{Math.round(report.weather.daily.temperature_2m_min[index])}°</span>
+              </div>
+              <span className="rain-chance">{report.weather.daily.precipitation_probability_max[index]}% rain</span>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function SafetySection() {
+  return (
+    <section id="safety" className="field-note" aria-labelledby="safety-title">
+      <span className="field-note-number">04</span>
+      <div>
+        <span className="section-kicker dark">Before you launch</span>
+        <h2 id="safety-title">Nature is still the boss.</h2>
+      </div>
+      <p>
+        River levels can change quickly and a safe flow varies by river, route, and experience.
+        Check local notices, weather alerts, and Hudak Outfitters guidance before you plop into the water.
+      </p>
+    </section>
+  );
+}
+
 export function App() {
   const [query, setQuery] = useState("Lewisberry, PA");
   const [report, setReport] = useState<Report | null>(null);
@@ -492,23 +632,35 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <header className="site-header">
+      <a className="skip-link" href="#main-content">Skip to the float report</a>
+
+      <header id="top" className="site-header">
         <a className="brand" href="#top" aria-label="Riverwise home">
           <span className="brand-mark">R!</span>
           <span>Riverwise!</span>
         </a>
-        <div className="outfitter-badge">
-          <span aria-hidden="true">★</span>
-          Powered by Hudak Outfitters
-        </div>
-        <div className="header-note">
-          <span className="live-dot" />
-          Fresh-ish facts
+
+        <nav className="primary-nav" aria-label="Float report sections">
+          <a href="#conditions"><span>01</span> Conditions</a>
+          <a href="#route"><span>02</span> Route</a>
+          <a href="#plan"><span>03</span> Pack + play</a>
+          <a href="#safety"><span>04</span> Safety</a>
+        </nav>
+
+        <div className="header-utility">
+          <div className="header-note">
+            <span className="live-dot" />
+            Fresh-ish facts
+          </div>
+          <div className="outfitter-badge">
+            <span aria-hidden="true">★</span>
+            Powered by Hudak Outfitters
+          </div>
         </div>
       </header>
 
-      <main id="top">
-        <section className="hero">
+      <main id="main-content">
+        <section id="conditions" className="hero" aria-labelledby="conditions-title">
           <div className="silly-sun" aria-hidden="true">☀</div>
           <div className="splash splash-one" />
           <div className="splash splash-two" />
@@ -516,8 +668,8 @@ export function App() {
             <span>😎</span>
           </div>
           <div className="hero-content">
-            <p className="eyebrow">Maple Shade river intelligence-ish</p>
-            <h1>Is it a<br /><span>float day?</span></h1>
+            <p className="eyebrow">01A · Conditions right now</p>
+            <h1 id="conditions-title">Is it a<br /><span>float day?</span></h1>
             <p className="hero-copy">
               Weather, water, and exactly zero guesses pulled from a soggy hat.
               Find out what the sky and nearby stream gauges are plotting.
@@ -606,9 +758,20 @@ export function App() {
           </aside>
         </section>
 
-        <section className="route-section" aria-labelledby="route-title">
+        {report && (
+          <>
+            <WaterSection
+              report={report}
+              loading={loading}
+              onRetry={() => void loadReport(report.location)}
+            />
+            <ForecastSection report={report} />
+          </>
+        )}
+
+        <section id="route" className="route-section" aria-labelledby="route-title">
           <div className="route-intro">
-            <span className="section-kicker dark">The Yellow Breeches float plan</span>
+            <span className="section-kicker dark">02 · Follow the route</span>
             <h2 id="route-title">Messiah to McCormick.<br /><em>Let’s get weirdly scenic.</em></h2>
             <p>
               A laid-back downstream adventure from the Messiah University access to
@@ -679,10 +842,10 @@ export function App() {
           </div>
         </section>
 
-        <section className="float-kit-section" aria-labelledby="float-kit-title">
+        <section id="plan" className="float-kit-section" aria-labelledby="float-kit-title">
           <div className="float-kit-heading">
             <div>
-              <span className="section-kicker light">Highly scientific fun supplies</span>
+              <span className="section-kicker light">03 · Plan, pack, and press play</span>
               <h2 id="float-kit-title">Pack it. Play it.<br /><em>Plop in.</em></h2>
             </div>
             <p>
@@ -739,9 +902,11 @@ export function App() {
           </div>
         </section>
 
-        <section className="review-section" aria-labelledby="review-title">
+        <SafetySection />
+
+        <section id="wisdom" className="review-section" aria-labelledby="review-title">
           <div className="review-heading">
-            <span className="section-kicker">Unfiltered river wisdom</span>
+            <span className="section-kicker">Bonus · Unfiltered river wisdom</span>
             <h2 id="review-title">The people have floated.</h2>
           </div>
           <article className="review-card">
@@ -757,130 +922,6 @@ export function App() {
           </article>
           <p className="review-fineprint">A totally real-looking fake review for demonstration purposes. The creek, however, is extremely real.</p>
         </section>
-
-        {report && (
-          <>
-            <section className="forecast-section" aria-labelledby="forecast-title">
-              <div className="section-heading">
-                <div>
-                  <span className="section-kicker dark">Seven-day sky shenanigans</span>
-                  <h2 id="forecast-title">What the clouds are cooking</h2>
-                </div>
-                <p>The farther out we look, the more the clouds may be making things up. Check again before launch.</p>
-              </div>
-
-              <div className="forecast-grid">
-                {report.weather.daily.time.map((date, index) => {
-                  const description = getWeatherDescription(report.weather.daily.weather_code[index]);
-                  return (
-                    <article className="forecast-day" key={date}>
-                      <span className="day-name">{formatDay(date, index)}</span>
-                      <span className="forecast-glyph" aria-hidden="true">{description.glyph}</span>
-                      <span className="forecast-label">{description.label}</span>
-                      <div className="temperatures">
-                        <strong>{Math.round(report.weather.daily.temperature_2m_max[index])}°</strong>
-                        <span>{Math.round(report.weather.daily.temperature_2m_min[index])}°</span>
-                      </div>
-                      <span className="rain-chance">{report.weather.daily.precipitation_probability_max[index]}% rain</span>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="water-section" aria-labelledby="water-title">
-              <div className="water-heading">
-                <div>
-                  <span className="section-kicker light">Nearby USGS tattletales</span>
-                  <h2 id="water-title">The river has receipts</h2>
-                </div>
-                <p>
-                  Real observations from active stream gauges, ranked from “right over there” to “still pretty close.”
-                </p>
-              </div>
-
-              {loading ? (
-                <LoadingCard />
-              ) : report.gauges.length ? (
-                <div className="gauge-grid">
-                  {report.gauges.map((gauge, index) => {
-                    const trend = trendFor(gauge.discharge);
-                    return (
-                      <article className="gauge-card" key={gauge.id}>
-                        <div className="gauge-topline">
-                          <span>Nosy gauge {String(index + 1).padStart(2, "0")}</span>
-                          <span>{gauge.distance.toFixed(1)} mi away-ish</span>
-                        </div>
-                        <h3>{gauge.name.replace(/^USGS\s+/i, "")}</h3>
-                        <div className="flow-reading">
-                          <div>
-                            <span>Discharge</span>
-                            <strong>{gauge.discharge ? Math.round(gauge.discharge.value).toLocaleString() : "—"}</strong>
-                            <small>{gauge.discharge?.unit ?? "cfs"}</small>
-                          </div>
-                          <SparkBars values={gauge.discharge?.series ?? []} />
-                        </div>
-                        <div className="gauge-metrics">
-                          <div>
-                            <span>Gauge height</span>
-                            <strong>{gauge.height ? `${gauge.height.value.toFixed(2)} ${gauge.height.unit}` : "Not reported"}</strong>
-                          </div>
-                          <div>
-                            <span>Water temp</span>
-                            <strong>{gauge.waterTemperature ? `${gauge.waterTemperature.value.toFixed(1)} ${gauge.waterTemperature.unit}` : "Not reported"}</strong>
-                          </div>
-                        </div>
-                        <div className="gauge-footer">
-                          <span className={`trend ${trend.tone}`}>{trend.label}</span>
-                          <span>{formatObservedAt(gauge.discharge?.time ?? gauge.height?.time)}</span>
-                        </div>
-                        <a
-                          href={`https://waterdata.usgs.gov/monitoring-location/${gauge.id}/`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          See the official nerdy details <span aria-hidden="true">↗</span>
-                        </a>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="empty-water">
-                  <span aria-hidden="true">≈</span>
-                  <div>
-                    <h3>No nearby USGS stream gauges found</h3>
-                    <p>
-                      {report.waterError ?? "Weather is available worldwide, but this water report uses U.S. Geological Survey gauges within roughly 50 miles."}
-                    </p>
-                    {report.waterError && (
-                      <button
-                        className="retry-gauge-button"
-                        type="button"
-                        onClick={() => void loadReport(report.location)}
-                        disabled={loading}
-                      >
-                        Try the gauge gossip again
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </section>
-
-            <section className="field-note">
-              <span className="field-note-number">UH-OH</span>
-              <div>
-                <span className="section-kicker dark">Tiny serious moment</span>
-                <h2>Nature is still the boss.</h2>
-              </div>
-              <p>
-                River levels can change quickly and a safe flow varies by river, route, and experience.
-                Check local notices, weather alerts, and Hudak Outfitters guidance before you plop into the water.
-              </p>
-            </section>
-          </>
-        )}
       </main>
 
       <footer>
