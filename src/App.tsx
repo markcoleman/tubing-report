@@ -645,6 +645,7 @@ export function App() {
           <a href="#route"><span>02</span> Route</a>
           <a href="#plan"><span>03</span> Pack + play</a>
           <a href="#safety"><span>04</span> Safety</a>
+          <a href="#/store"><span>05</span> Creek store</a>
         </nav>
 
         <div className="header-utility">
