@@ -19,6 +19,8 @@ const productImages = [
   },
 ] as const;
 
+const storeAssetBase = `${import.meta.env.BASE_URL}store`;
+
 function ProductPicture({
   basename,
   alt,
@@ -28,16 +30,18 @@ function ProductPicture({
   alt: string;
   eager?: boolean;
 }) {
+  const assetPath = `${storeAssetBase}/${basename}`;
+
   return (
     <picture>
       <source
         type="image/avif"
-        srcSet={`/store/${basename}-800.avif 800w, /store/${basename}-1600.avif 1600w`}
+        srcSet={`${assetPath}-800.avif 800w, ${assetPath}-1600.avif 1600w`}
         sizes="(max-width: 760px) 92vw, 46vw"
       />
       <img
-        src={`/store/${basename}-800.jpg`}
-        srcSet={`/store/${basename}-800.jpg 800w, /store/${basename}-1600.jpg 1600w`}
+        src={`${assetPath}-800.jpg`}
+        srcSet={`${assetPath}-800.jpg 800w, ${assetPath}-1600.jpg 1600w`}
         sizes="(max-width: 760px) 92vw, 46vw"
         width="1200"
         height="1600"
